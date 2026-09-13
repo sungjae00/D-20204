@@ -48,28 +48,50 @@ selected_movie = st.selectbox("분석할 영화를 선택하세요:", sorted_mov
 # 사용자가 선택한 영화의 데이터만 추출
 movie_df = df[df["영화명"] == selected_movie]
 
-# [5. 기타 - 구역 나누기]
-st.divider()
-st.subheader(f"📈 [{selected_movie}] 일별 관객수 추이")
 
-# [4. 선그래프 그리기]
-# Plotly를 이용해 기준일자별 해당일관객수 선 그래프 작성
-fig = px.line(
+# --------------------------------------------------
+# [구역 1] 일별 관객수 선 그래프
+# --------------------------------------------------
+st.divider()
+st.subheader(f"📈 1. [{selected_movie}] 일별 관객수 추이 (선 그래프)")
+
+# Plotly 선 그래프
+fig_line = px.line(
     movie_df,
     x="기준일자",
     y="해당일관객수",
-    title=f"{selected_movie} - 일별 관객수 변화 그래프",
+    title=f"{selected_movie} - 일별 관객수 변화",
     labels={"기준일자": "날짜", "해당일관객수": "일별 관객수"},
     markers=True,
 )
 
-# Plotly 그래프 출력
-st.plotly_chart(fig, use_container_width=True)
+# 그래프 출력
+st.plotly_chart(fig_line, use_container_width=True)
 
-# [5. 기타 - 설명 문구 자리]
+# 그래프 설명 문구 자리
 st.info("💡 **이 그래프로 알 수 있는 것:** (이곳에 해석 문구를 입력하세요.)")
 
-# 추후 다른 그래프를 추가할 구역 예시
+
+# --------------------------------------------------
+# [구역 2] 누적 관객수 영역 차트 (신규 추가)
+# --------------------------------------------------
 st.divider()
-st.subheader("📌 추가 분석 구역")
-st.caption("새로운 그래프나 데이터 요약표가 들어갈 위치입니다.")
+st.subheader(f"📊 2. [{selected_movie}] 누적 관객수 변화 (영역 차트)")
+
+# Plotly 영역 차트 (px.area 사용)
+fig_area = px.area(
+    movie_df,
+    x="기준일자",
+    y="누적관객수",
+    title=f"{selected_movie} - 누적 관객수 증가 추이",
+    labels={"기준일자": "날짜", "누적관객수": "누적 관객수"},
+)
+
+# 영역 차트 색상 및 투명도 살짝 조정 (선택 사항)
+fig_area.update_traces(fillcolor="rgba(31, 119, 180, 0.4)")
+
+# 그래프 출력
+st.plotly_chart(fig_area, use_container_width=True)
+
+# 그래프 설명 문구 자리
+st.info("💡 **이 그래프로 알 수 있는 것:** (이곳에 해석 문구를 입력하세요.)")
