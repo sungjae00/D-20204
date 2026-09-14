@@ -21,7 +21,7 @@ def load_data():
   # "기준일자" 컬럼을 datetime 형식으로 변환
   df["기준일자"] = pd.to_datetime(df["기준일자"])
 
-  # 전체 데이터를 기준일자 순으로 정렬 (이동평균 계산을 위해 날짜 순 정렬 필수)
+  # 전체 데이터를 기준일자 순으로 정렬
   df = df.sort_values(by="기준일자")
 
   return df
@@ -88,7 +88,7 @@ fig_area = px.area(
     labels={"기준일자": "날짜", "누적관객수": "누적 관객수"},
 )
 
-# 영역 차트 색상 및 투명도 살짝 조정
+# 영역 차트 색상 및 투명도 조정
 fig_area.update_traces(fillcolor="rgba(31, 119, 180, 0.4)")
 
 # 그래프 출력
@@ -106,7 +106,7 @@ st.subheader(
     "🏆 3. 장기 흥행작(TOP 10 20일 이상) 누적 관객수 TOP 5 비교 (다중 선 그래프)"
 )
 
-# 1. TOP 10에 진입한 데이터만 필터링 ('순위' 컬럼이 있으면 10위 이하, 없으면 전체 사용)
+# 1. TOP 10 진입 데이터 필터링
 if "순위" in df.columns:
   top10_df = df[df["순위"] <= 10]
 else:
@@ -115,19 +115,18 @@ else:
 # 2. 영화별 TOP 10 진입 일수 계산
 top10_days = top10_df.groupby("영화명")["기준일자"].nunique()
 
-# 3. TOP 10에 20일 이상 등장한 영화만 선택
+# 3. TOP 10에 20일 이상 등장한 영화 선택
 movies_over_20days = top10_days[top10_days >= 20].index
 
-# 4. 조건을 만족하는 영화 중 누적 관객수 상위 5개 영화 선택
+# 4. 조건 만족 영화 중 누적 관객수 상위 5개 선택
 filtered_audience = movie_audience[
     movie_audience["영화명"].isin(movies_over_20days)
 ]
 top5_movies = filtered_audience.head(5)["영화명"].tolist()
 
-# 5. 최종 선택된 5개 영화의 데이터 추출
+# 5. 선택된 5개 영화 데이터 추출 및 다중 선 그래프 생성
 top5_df = df[df["영화명"].isin(top5_movies)]
 
-# 6. Plotly 다중 선 그래프 생성
 fig_multi = px.line(
     top5_df,
     x="기준일자",
@@ -145,7 +144,7 @@ st.info("💡 **이 그래프로 알 수 있는 것:** (이곳에 해석 문구�
 
 
 # --------------------------------------------------
-# [구역 4] 전체 TOP 10 영화 일별 관객수 합계 및 7일 이동평균선 (신규 추가)
+# [구역 4] 전체 TOP 10 영화 일별 관객수 합계 및 7일 이동평균선
 # --------------------------------------------------
 st.divider()
 st.subheader("📉 4. 전체 박스오피스 일별 관객수 합계 및 7일 이동평균선")
@@ -156,15 +155,14 @@ daily_summary = (
 )
 daily_summary = daily_summary.sort_values("기준일자")
 
-# 2. 7일 이동평균 계산 (rolling window=7)
+# 2. 7일 이동평균 계산
 daily_summary["7일_이동평균"] = (
     daily_summary["해당일관객수"].rolling(window=7, min_periods=1).mean()
 )
 
-# 3. Plotly Graph Objects를 활용해 두 선을 커스텀 스타일로 겹쳐서 작성
+# 3. Plotly Graph Objects 생성
 fig_ma = go.Figure()
 
-# 원본 일별 관객수 합계 (연한 색상/얇은 선)
 fig_ma.add_trace(
     go.Scatter(
         x=daily_summary["기준일자"],
@@ -175,7 +173,6 @@ fig_ma.add_trace(
     )
 )
 
-# 7일 이동평균 (진한 색상/두꺼운 선)
 fig_ma.add_trace(
     go.Scatter(
         x=daily_summary["기준일자"],
@@ -186,7 +183,6 @@ fig_ma.add_trace(
     )
 )
 
-# 그래프 레이아웃 설정
 fig_ma.update_layout(
     title="일별 TOP 10 총 관객수 및 7일 이동평균 추이",
     xaxis_title="날짜",
@@ -194,8 +190,43 @@ fig_ma.update_layout(
     hovermode="x unified",
 )
 
-# 그래프 출력
 st.plotly_chart(fig_ma, use_container_width=True)
+
+st.info("💡 **이 그래프로 알 수 있는 것:** (이곳에 해석 문구를 입력하세요.)")
+
+
+# --------------------------------------------------
+# [구역 5] 월별 총 관객수 합계 막대그래프 (신규 추가)
+# --------------------------------------------------
+st.divider()
+st.subheader("📊 5. 월별 전체 관객수 합계 (막대그래프)")
+
+# 1. '기준일자'에서 '연-월(YYYY-MM)' 문자열 추출
+daily_summary["연월"] = daily_summary["기준일자"].dt.strftime("%Y-%m")
+
+# 2. 연-월 단위로 그룹화하여 해당월의 관객수 총합 계산
+monthly_summary = (
+    daily_summary.groupby("연월")["해당일관객수"].sum().reset_index()
+)
+
+# 3. Plotly 막대그래프 생성
+fig_bar = px.bar(
+    monthly_summary,
+    x="연월",
+    y="해당일관객수",
+    title="월별 박스오피스 총 관객수 비교",
+    labels={"연월": "월(Year-Month)", "해당일관객수": "월간 총 관객수"},
+    text_auto=".2s",  # 막대 상단에 숫자를 간략히 표시 (예: 1.5M, 500k)
+)
+
+# 막대 색상 및 레이아웃 설정
+fig_bar.update_traces(
+    marker_color="#1f77b4", textposition="outside"
+)  # 텍스트 위치를 막대 바깥쪽으로 지정
+fig_bar.update_layout(xaxis_type="category")  # 월별 축 간격을 일정하게 고정
+
+# 그래프 출력
+st.plotly_chart(fig_bar, use_container_width=True)
 
 # 그래프 설명 문구 자리
 st.info("💡 **이 그래프로 알 수 있는 것:** (이곳에 해석 문구를 입력하세요.)")
