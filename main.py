@@ -169,3 +169,36 @@ st.plotly_chart(fig_box, use_container_width=True)
 
 st.markdown("**💡 이 그래프로 알 수 있는 것**")
 st.info("영화 편수가 많은 주요 장르별 관객수의 중앙값과 사분위수(범위)를 비교할 수 있으며, 일반적인 범주를 크게 벗어나 독보적인 흥행을 기록한 아웃라이어(이상치) 영화들을 확인할 수 있습니다.")
+
+st.divider()
+
+# -------------------------------------------------------------------
+# 구역 6: 스크린수, 첫 주 관객수, 총 관객수의 관계 (버블 차트)
+# -------------------------------------------------------------------
+st.header("6. 스크린수·첫 주 관객수·총 관객수의 관계 (버블 차트)")
+
+fig_bubble = px.scatter(
+    df,
+    x='first_scrn',
+    y='total_audi',
+    size='first_week_audi',
+    color='genre',
+    hover_name='movieNm',
+    hover_data={
+        'first_scrn': ':,',
+        'total_audi': ':,',
+        'first_week_audi': ':,'
+    },
+    labels={
+        'first_scrn': '개봉일 스크린수',
+        'total_audi': '총 관객수',
+        'first_week_audi': '개봉 첫 주 관객수',
+        'genre': '장르'
+    },
+    title="개봉일 스크린수 대비 총 관객수 (버블 크기: 개봉 첫 주 관객수)"
+)
+
+st.plotly_chart(fig_bubble, use_container_width=True)
+
+st.markdown("**💡 이 그래프로 알 수 있는 것**")
+st.info("스크린수와 최종 관객수의 상관관계뿐만 아니라, 버블의 크기를 통해 개봉 첫 주 초반 집객력(첫 주 관객수)이 최종 흥행 규모에 어떠한 영향을 미치는지 복합적으로 파악할 수 있습니다.")
