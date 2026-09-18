@@ -16,8 +16,13 @@ def load_data():
     url = "https://raw.githubusercontent.com/greatsong/modudata/main/data/kobis_movies.csv"
     df = pd.read_csv(url)
     
-    # genre 열 전처리: Pandas 문자열 전용 메서드를 사용해 첫 번째 장르만 추출 (TypeError 방지)
-    df['genre'] = df['genre'].fillna('').astype(str).str.split('|').str[0]
+    # genre 열 전처리: 첫 번째 장르만 추출 및 결측치/빈값 처리
+    df['genre'] = df['genre'].fillna('기타').astype(str).str.split('|').str[0]
+    df['genre'] = df['genre'].replace('', '기타')
+    
+    # nation 열 결측치 및 빈값 처리 (선버스트 오류 방지)
+    df['nation'] = df['nation'].fillna('기타').astype(str).replace('', '기타')
+    
     return df
 
 df = load_data()
@@ -210,10 +215,13 @@ st.divider()
 # -------------------------------------------------------------------
 st.header("7. 제작 국가 및 장르별 영화 편수 분포")
 
-# 선버스트 차트 생성: 계층구조(제작 국가 -> 장르), 칸 크기(영화 편수)
+# 제작 국가와 장르별 영화 편수 미리 집계
+df_sunburst = df.groupby(['nation', 'genre']).size().reset_index(name='count')
+
 fig_sunburst = px.sunburst(
-    df,
+    df_sunburst,
     path=['nation', 'genre'],
+    values='count',
     title="제작 국가 및 장르별 영화 편수 계층 구조"
 )
 
