@@ -234,3 +234,34 @@ st.plotly_chart(fig_sunburst, use_container_width=True)
 
 st.markdown("**💡 이 그래프로 알 수 있는 것**")
 st.info("주요 제작 국가별로 어떤 장르의 영화가 주로 제작·개봉되는지 국가와 장르 간의 계층적 비중과 세부 구성비를 한눈에 비교할 수 있습니다.")
+
+st.divider()
+
+# -------------------------------------------------------------------
+# 구역 8: 10위권에 오래 머문 영화는 총 관객도 많은가 (산점도)
+# -------------------------------------------------------------------
+st.header("8. 10위권에 오래 머문 영화는 총 관객도 많은가")
+
+fig_scatter_stay = px.scatter(
+    df,
+    x='days_in_top10',
+    y='total_audi',
+    color='genre',
+    hover_name='movieNm',
+    labels={
+        'days_in_top10': '10위권 머문 날수',
+        'total_audi': '총 관객수',
+        'genre': '장르'
+    },
+    title="10위권에 오래 머문 영화는 총 관객도 많은가"
+)
+
+# 마우스 호버 시 영화명, 머문 날수, 관객수 표시
+fig_scatter_stay.update_traces(
+    hovertemplate="<b>%{hovertext}</b><br>10위권 머문 날수: %{x}일<br>총 관객수: %{y:,.0f}명<extra></extra>"
+)
+
+st.plotly_chart(fig_scatter_stay, use_container_width=True)
+
+st.markdown("**💡 이 그래프로 알 수 있는 것**")
+st.info("박스오피스 10위권 내에 오래 상주한 영화일수록 대체로 총 관객수도 높게 형성되는 양의 상관관계를 보이며, 관객 집객력의 장기 유지(롱런)가 총 관객수에 미치는 영향을 알 수 있습니다.")
