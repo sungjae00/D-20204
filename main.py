@@ -16,8 +16,8 @@ def load_data():
     url = "https://raw.githubusercontent.com/greatsong/modudata/main/data/kobis_movies.csv"
     df = pd.read_csv(url)
     
-    # genre 열 전처리: '|' 구분자로 나눈 후 첫 번째 장르만 추출
-    df['genre'] = df['genre'].astype(str).apply(lambda x: x.split('|')[0] if '|' in x else x)
+    # genre 열 전처리: Pandas 문자열 전용 메서드를 사용해 첫 번째 장르만 추출 (TypeError 방지)
+    df['genre'] = df['genre'].fillna('').astype(str).str.split('|').str[0]
     return df
 
 df = load_data()
@@ -38,7 +38,7 @@ fig_donut = px.pie(
     title="장르별 영화 편수 비율"
 )
 
-# 마우스 호버 시 편수와 비율이 보이도록 설정
+# 마우스 호버 시 편수와 비율 표시
 fig_donut.update_traces(
     textinfo='percent+label',
     hovertemplate="<b>%{label}</b><br>편수: %{value}편<br>비율: %{percent}<extra></extra>"
@@ -65,7 +65,7 @@ fig_treemap = px.treemap(
     title="장르 내 영화별 총 관객수 비중"
 )
 
-# 마우스 호버 시 영화명과 총 관객수가 보이도록 설정
+# 마우스 호버 시 영화명과 총 관객수 표시
 fig_treemap.update_traces(
     hovertemplate="<b>%{label}</b><br>총 관객수: %{value:,.0f}명<extra></extra>"
 )
