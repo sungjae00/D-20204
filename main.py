@@ -138,3 +138,34 @@ st.plotly_chart(fig_scatter, use_container_width=True)
 
 st.markdown("**💡 이 그래프로 알 수 있는 것**")
 st.info("개봉 첫날 확보한 스크린수가 많을수록 대체로 총 관객수도 증가하는 양의 상관관계를 보이며, 초기 스크린 수가 적음에도 불구하고 높은 총 관객수를 기록한 흥행작 및 장르별 양상을 확인할 수 있습니다.")
+
+st.divider()
+
+# -------------------------------------------------------------------
+# 구역 5: 주요 장르별 총 관객수 분포 (박스플롯)
+# -------------------------------------------------------------------
+st.header("5. 주요 장르별 총 관객수 분포 (10편 이상 장르)")
+
+# 영화가 10편 이상인 장르만 필터링
+genre_counts_series = df['genre'].value_counts()
+valid_genres = genre_counts_series[genre_counts_series >= 10].index
+df_box = df[df['genre'].isin(valid_genres)]
+
+fig_box = px.box(
+    df_box,
+    x='genre',
+    y='total_audi',
+    color='genre',
+    points='outliers',
+    hover_name='movieNm',
+    labels={
+        'genre': '장르',
+        'total_audi': '총 관객수'
+    },
+    title="10편 이상 제작된 장르별 총 관객수 상자 그림"
+)
+
+st.plotly_chart(fig_box, use_container_width=True)
+
+st.markdown("**💡 이 그래프로 알 수 있는 것**")
+st.info("영화 편수가 많은 주요 장르별 관객수의 중앙값과 사분위수(범위)를 비교할 수 있으며, 일반적인 범주를 크게 벗어나 독보적인 흥행을 기록한 아웃라이어(이상치) 영화들을 확인할 수 있습니다.")
