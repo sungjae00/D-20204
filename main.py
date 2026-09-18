@@ -41,52 +41,36 @@ fig_donut = px.pie(
 # 마우스 호버 시 편수와 비율이 보이도록 설정
 fig_donut.update_traces(
     textinfo='percent+label',
-    hovertemplate="<b>%{label}</b><br>편수: %{value}편<br>비율: %{percent}"
+    hovertemplate="<b>%{label}</b><br>편수: %{value}편<br>비율: %{percent}<extra></extra>"
 )
 
 st.plotly_chart(fig_donut, use_container_width=True)
 
 st.markdown("**💡 이 그래프로 알 수 있는 것**")
-st.info("박스오피스 상위권 영화 중 어떤 장르가 가장 큰 비중을 차지하는지 장르별 분포 점유율을 한눈에 파악할 수 있습니다.")
+st.info("박스오피스 상위권 영화 중 어떤 장르가 가장 큰 비중을 차지하는지 장르별 편수 분포 점유율을 한눈에 파악할 수 있습니다.")
 
 st.divider()
 
 # -------------------------------------------------------------------
-# 구역 2: 개봉일 스크린수와 총 관객수의 관계 (산점도)
+# 구역 2: 장르 및 영화별 총 관객수 (트리맵)
 # -------------------------------------------------------------------
-st.header("2. 개봉일 스크린수와 총 관객 수의 관계")
+st.header("2. 장르 및 영화별 총 관객수 분포")
 
-fig_scatter = px.scatter(
+# 트리맵 생성: 계층구조(장르 -> 영화명), 칸 크기(총 관객수)
+fig_treemap = px.treemap(
     df,
-    x='first_scrn',
-    y='total_audi',
+    path=['genre', 'movieNm'],
+    values='total_audi',
     color='genre',
-    hover_name='movieNm',
-    labels={'first_scrn': '개봉일 스크린수', 'total_audi': '총 관객수', 'genre': '장르'},
-    title="개봉일 스크린수 대비 총 관객수 분포"
+    title="장르 내 영화별 총 관객수 비중"
 )
 
-st.plotly_chart(fig_scatter, use_container_width=True)
-
-st.markdown("**💡 이 그래프로 알 수 있는 것**")
-st.info("초기 스크린 확보 수가 최종 흥행(총 관객수)에 미치는 상관관계 및 장르별 흥행 양상을 확인할 수 있습니다.")
-
-st.divider()
-
-# -------------------------------------------------------------------
-# 구역 3: 10위권 머문 날수 분포 (히스토그램)
-# -------------------------------------------------------------------
-st.header("3. 10위권 머문 날수 분포")
-
-fig_hist = px.histogram(
-    df,
-    x='days_in_top10',
-    nbins=20,
-    labels={'days_in_top10': '10위권 머문 날수', 'count': '영화 수'},
-    title="TOP 10 생존 기간 분포"
+# 마우스 호버 시 영화명과 총 관객수가 보이도록 설정
+fig_treemap.update_traces(
+    hovertemplate="<b>%{label}</b><br>총 관객수: %{value:,.0f}명<extra></extra>"
 )
 
-st.plotly_chart(fig_hist, use_container_width=True)
+st.plotly_chart(fig_treemap, use_container_width=True)
 
 st.markdown("**💡 이 그래프로 알 수 있는 것**")
-st.info("대부분의 영화가 박스오피스 TOP 10 순위권 내에 며칠 동안 머무르는지 전체적인 롱런 여부 및 유지 기간 분포를 알 수 있습니다.")
+st.info("장르 전체의 관객 규모와 더불어, 특정 장르 안에서 어떤 영화가 가장 많은 관객을 동원하며 흥행을 이끌었는지 직관적으로 알 수 있습니다.")
